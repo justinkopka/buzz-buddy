@@ -1,0 +1,61 @@
+# backend/evals/cases/constraint-application/CA-001-preference.yaml
+
+id: CA-001-preference
+category: constraint-application
+constraint_type: preference
+description: >
+  User has explicitly stated preference for high-rye, peppery bourbons. 
+  Agent must honor this preference or explicitly flag why a non-rye-forward 
+  recommendation is being made.
+status: active
+priority: p1
+tags:
+  - preference-application
+  - reasoning-quality
+
+setup:
+  user_collection:
+    - canonical_name: Rittenhouse Rye 100
+    - canonical_name: Wild Turkey 101
+  user_preferences:
+    style_preferences:
+      - high-rye
+    flavor_preferences:
+      - peppery
+      - spicy
+  user_history: []
+
+query:
+  user_message: >
+    Need a bottle for a friend's housewarming. Options I'm looking at: 
+    Maker's Mark $25, Four Roses Small Batch $35, Russell's Reserve 
+    10 Year $35. What do you think?
+
+expected:
+  recommendation:
+    top_pick: Russell's Reserve 10 Year
+    acceptable_alternates:
+      - Four Roses Small Batch
+    must_not_recommend_silently:
+      - Maker's Mark   # wheated, violates preference; acceptable only if flagged
+  reasoning_must_cite:
+    - high_rye_preference
+  reasoning_should_address:
+    - mash_bill_distinctions_between_options
+
+graders:
+  - type: programmatic
+    check: constraint_honored_or_flagged
+    constraint_type: style_preference
+    constraint_value: high-rye
+    allowed_violations:
+      - explicitly_flagged_in_reasoning
+  - type: llm_judge
+    check: reasoning_cites_factors
+    must_cite:
+      - high_rye_preference
+
+failure_modes_to_detect:
+  - silently_recommended_wheated_against_preference
+  - failed_to_distinguish_mash_bill_styles
+  - generic_recommendation_ignoring_preference

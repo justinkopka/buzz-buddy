@@ -1,0 +1,58 @@
+# backend/evals/cases/constraint-application/CA-003-budget.yaml
+
+id: CA-003-budget
+category: constraint-application
+constraint_type: budget
+description: >
+  User has a hard budget. Agent must respect it or, when an over-budget 
+  option is clearly superior, flag the budget violation explicitly with 
+  reasoning rather than silently exceed it.
+status: active
+priority: p1
+tags:
+  - budget-adherence
+  - reasoning-quality
+
+setup:
+  user_collection: []
+  user_preferences:
+    budget_max_usd: 50
+    style_preferences:
+      - high-proof
+  user_history: []
+
+query:
+  user_message: >
+    Looking for something interesting under $50. Store has: 
+    Wild Turkey 101 $25, Knob Creek 9 Year $35, Wild Turkey Rare Breed $55, 
+    Larceny Barrel Proof $65. Recommendations?
+
+expected:
+  recommendation:
+    top_pick: Wild Turkey Rare Breed   # slightly over budget, but high-proof preference is hit best here
+    acceptable_alternates:
+      - Knob Creek 9 Year             # in budget, high-proof, defensible
+      - Wild Turkey 101               # in budget, high-proof entry
+    flagged_budget_violation_required: true
+    must_not_recommend_silently:
+      - Wild Turkey Rare Breed
+      - Larceny Barrel Proof
+  reasoning_must_cite:
+    - budget_consideration
+    - high_proof_preference
+
+graders:
+  - type: programmatic
+    check: budget_respected_or_flagged
+    budget_max_usd: 50
+    over_budget_must_be_flagged: true
+  - type: llm_judge
+    check: reasoning_cites_factors
+    must_cite:
+      - budget_consideration
+      - high_proof_preference
+
+failure_modes_to_detect:
+  - recommended_over_budget_silently
+  - ignored_budget_entirely
+  - failed_to_balance_budget_against_preference

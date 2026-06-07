@@ -1,0 +1,115 @@
+# backend/evals/cases/tool-use/TU-001-template.yaml
+
+id: TU-001-template
+category: tool-use-correctness
+status: template
+priority: p2
+template_reason: >
+  This case is a template, not yet executable. Tool names, parameters, 
+  and expected call sequences will be concretized once the agent is 
+  built (Sprint 4). The structure here serves as a model for actual 
+  tool-use cases drafted post-implementation.
+
+description: >
+  When the user asks for a decision-support recommendation, the agent 
+  must call the expected sequence of tools to gather necessary context 
+  before responding. This case tests the agent's tool-orchestration 
+  behavior, not its final answer quality (which is tested by 
+  Decision Support cases).
+
+setup:
+  user_collection:
+    - canonical_name: Eagle Rare 10 Year   # placeholder
+  user_preferences:
+    proof_preference: high   # placeholder
+  user_history: []
+
+query:
+  user_message: >
+    I'm at a store looking at three bottles. Which should I grab?
+    [Specifics to be added when case is concretized]
+
+expected:
+  tool_call_sequence:
+    description: >
+      The agent should invoke tools in roughly this order. Some 
+      flexibility in ordering is acceptable as long as dependencies 
+      are respected (e.g., resolve_bottle must precede 
+      get_bottle_info for that bottle).
+    expected_calls:
+      - tool: resolve_bottle
+        purpose: identify each bottle mentioned in the query
+        expected_invocations_min: 1
+        expected_invocations_max: 5
+      - tool: get_user_preferences
+        purpose: load user preference profile
+        expected_invocations_min: 1
+        expected_invocations_max: 1
+      - tool: get_user_collection
+        purpose: load user's existing bottles
+        expected_invocations_min: 1
+        expected_invocations_max: 1
+      - tool: get_bottle_info
+        purpose: retrieve KB data for each resolved bottle
+        expected_invocations_min: 1
+        expected_invocations_max: 5
+    tool_call_sequence_constraints:
+      - resolve_bottle_must_precede_get_bottle_info_for_same_bottle
+      - get_user_preferences_must_be_called_before_final_recommendation
+  expected_NOT_called:
+    description: >
+      Tools that would be inappropriate to call in this query context.
+    forbidden_calls:
+      - search_secondary_market   # not relevant to a retail-store decision
+      - admin_only_tools          # access control verification
+
+graders:
+  - type: programmatic
+    check: required_tools_invoked
+    required_tools:
+      - resolve_bottle
+      - get_user_preferences
+      - get_user_collection
+      - get_bottle_info
+  - type: programmatic
+    check: tool_call_ordering_constraints
+    constraints:
+      - resolve_bottle_must_precede_get_bottle_info_for_same_bottle
+      - get_user_preferences_must_precede_final_response
+  - type: programmatic
+    check: forbidden_tools_not_invoked
+    forbidden_tools:
+      - search_secondary_market
+  - type: programmatic
+    check: invocation_count_bounds
+    description: >
+      Each tool called within expected min/max invocations. 
+      Excessive calls (e.g., resolve_bottle called 50 times) 
+      indicate agent malfunction.
+
+failure_modes_to_detect:
+  - skipped_user_preferences_lookup
+  - skipped_user_collection_lookup
+  - failed_to_resolve_bottles_before_lookup
+  - called_inappropriate_tools_for_context
+  - infinite_loop_or_excessive_tool_invocation
+  - hardcoded_response_without_tool_use
+
+architecture_dependencies:
+  - >
+    Runner must capture full tool-call trace from LangSmith, 
+    including tool name, parameters, ordering, and timing.
+  - >
+    Grader needs access to structured trace data, not just final 
+    response. The runner extracts tool-call sequence from trace 
+    before passing to graders.
+  - >
+    Tool name and parameter conventions must be locked in Sprint 4 
+    before this template can be fully concretized.
+
+notes: >
+  This template establishes the pattern. Once the agent is built, 
+  concrete cases following this pattern will specify exact tool 
+  names, exact expected sequences for specific query types, and 
+  exact parameter expectations. Likely 5-10 tool-use cases will 
+  be drafted in Sprint 7 alongside the eval runner.

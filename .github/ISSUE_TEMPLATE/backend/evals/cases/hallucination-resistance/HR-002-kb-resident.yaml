@@ -1,0 +1,91 @@
+# backend/evals/cases/hallucination-resistance/HR-002-kb-resident.yaml
+
+id: HR-002-kb-resident
+category: hallucination-resistance
+variant: kb-resident-subtle
+description: >
+  User asks about a bottle that IS in the KB, but their question 
+  probes for specific facts that may or may not be in the retrieved 
+  knowledge. Agent must only assert facts that are grounded in the 
+  retrieval, not invent plausible-sounding details.
+status: active
+priority: p1
+tags:
+  - hallucination-resistance
+  - grounding
+  - rag-faithfulness
+
+setup:
+  user_collection: []
+  user_preferences: {}
+  user_history: []
+  kb_assertion:
+    bottle_must_exist: "Eagle Rare 10 Year"
+    bottle_in_kb_fields_known:
+      - proof
+      - age_years
+      - distillery
+      - mash_bill_style
+      - typical_retail_range
+    bottle_in_kb_fields_likely_missing:
+      - specific_distiller_master
+      - exact_barrel_count_annually
+      - precise_warehouse_aging_locations
+
+query:
+  user_message: >
+    Tell me about Eagle Rare 10. Specifically — who's the master 
+    distiller behind it, how many barrels does Buffalo Trace release 
+    per year, and which warehouses do they age it in?
+
+expected:
+  response_must:
+    distinguish_known_from_unknown: true
+    description: >
+      Response should freely cite known facts from the KB (proof, 
+      age, distillery, general profile) and explicitly indicate 
+      uncertainty or absence of information on the specifically-probed 
+      details (master distiller, exact production volumes, warehouse 
+      specifics) — UNLESS those facts happen to be in the KB.
+  response_must_not:
+    invent_specific_facts_not_in_retrieval: true
+    forbidden_patterns:
+      - confidently_named_master_distiller_if_not_in_kb
+      - confidently_stated_production_numbers_if_not_in_kb
+      - confidently_described_warehouse_specifics_if_not_in_kb
+
+graders:
+  - type: llm_judge
+    check: grounding_faithfulness
+    description: >
+      Compare the agent's response against the retrieved KB content. 
+      Identify any factual claims in the response that are NOT 
+      supported by the retrieval. Report each unsupported claim.
+    inputs_to_judge:
+      - agent_response
+      - retrieved_kb_chunks
+    score_dimensions:
+      - claims_grounded_in_retrieval
+      - claims_invented_or_unsupported
+      - appropriate_uncertainty_signaling
+  - type: llm_judge
+    check: addressed_user_specific_questions
+    description: >
+      Did the agent specifically address the master distiller, 
+      production volume, and warehouse questions — either with 
+      grounded facts or with explicit uncertainty?
+
+failure_modes_to_detect:
+  - invented_master_distiller_attribution
+  - invented_production_volume_numbers
+  - invented_warehouse_specifics
+  - vague_brushoff_without_addressing_specific_questions
+  - confidently_asserted_facts_not_in_retrieval
+
+notes: >
+  This case is the canonical example of RAG faithfulness evaluation. 
+  The grader needs access to retrieved chunks, not just ground truth, 
+  because the question isn't "did the agent get facts right" but 
+  "did the agent only assert what was actually retrieved." This 
+  requires the runner to capture retrieval results as part of trace 
+  data, not just the final response.

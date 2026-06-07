@@ -1,0 +1,56 @@
+# backend/evals/cases/constraint-application/CA-002-collection.yaml
+
+id: CA-002-collection
+category: constraint-application
+constraint_type: collection
+description: >
+  User already owns several bottles. Agent must avoid recommending 
+  bottles already owned, and ideally consider gaps in the collection.
+status: active
+priority: p1
+tags:
+  - collection-awareness
+  - reasoning-quality
+
+setup:
+  user_collection:
+    - canonical_name: Buffalo Trace
+    - canonical_name: Eagle Rare 10 Year
+    - canonical_name: Maker's Mark
+    - canonical_name: Woodford Reserve
+  user_preferences:
+    budget_max_usd: 60
+  user_history: []
+
+query:
+  user_message: >
+    At my local store. Considering: Buffalo Trace $30, 
+    Knob Creek 9 Year $35, Eagle Rare $45, Henry McKenna 10 BIB $40. 
+    Help me pick.
+
+expected:
+  recommendation:
+    top_pick: Henry McKenna 10 BIB
+    acceptable_alternates:
+      - Knob Creek 9 Year
+    must_not_recommend:
+      - Buffalo Trace    # already owned
+      - Eagle Rare 10 Year   # already owned
+  reasoning_must_cite:
+    - collection_awareness
+  reasoning_should_cite:
+    - collection_gap_consideration   # noting what styles they don't have
+
+graders:
+  - type: programmatic
+    check: did_not_recommend_owned
+    user_collection_from_setup: true
+  - type: llm_judge
+    check: reasoning_cites_factors
+    must_cite:
+      - collection_awareness
+
+failure_modes_to_detect:
+  - recommended_already_owned_bottle
+  - failed_collection_check
+  - did_not_cite_collection_in_reasoning

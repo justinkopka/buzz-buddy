@@ -1,0 +1,83 @@
+# backend/evals/cases/edge-cases/EC-001-ambiguous-query.yaml
+
+id: EC-001-ambiguous-query
+category: edge-cases
+variant: ambiguous-query
+description: >
+  User's query is genuinely ambiguous — could refer to multiple bottles 
+  in a product line. Agent should recognize the ambiguity, name what's 
+  unclear, and ask for clarification rather than guessing.
+status: active
+priority: p2
+tags:
+  - edge-cases
+  - clarification-handling
+  - reasoning-quality
+
+setup:
+  user_collection: []
+  user_preferences: {}
+  user_history: []
+  kb_assertion:
+    bottles_must_exist:
+      - "Weller Special Reserve"
+      - "Weller Antique 107"
+      - "Weller 12 Year"
+      - "Weller Full Proof"
+      - "Weller Single Barrel"
+
+query:
+  user_message: >
+    Is the Weller worth it for $80?
+
+expected:
+  response_must:
+    recognize_ambiguity: true
+    description: >
+      The Weller lineup has multiple bottles at different price points 
+      and quality tiers, and "$80" could correspond to several of them 
+      (or be over/under MSRP for several). Agent should ask which 
+      specific Weller before answering, OR provide a structured 
+      response covering the most likely candidates.
+    acceptable_behaviors:
+      - asks_which_weller_specifically
+      - lists_likely_candidates_for_user_to_clarify
+      - addresses_each_relevant_weller_at_that_price_point
+  response_must_not:
+    pick_one_interpretation_silently: true
+    description: >
+      Agent must not confidently answer "yes the Weller is worth $80" 
+      or "no the Weller isn't worth $80" without acknowledging which 
+      Weller and at what context (above/below MSRP, secondary market, etc.).
+
+graders:
+  - type: llm_judge
+    check: ambiguity_handling
+    description: >
+      Did the agent recognize that "the Weller" is ambiguous given 
+      the multiple bottles in the Weller lineup? Did it either ask 
+      for clarification or address the ambiguity explicitly?
+    score_dimensions:
+      - ambiguity_recognized
+      - ambiguity_named_specifically
+      - clarification_requested_or_alternatives_addressed
+  - type: programmatic
+    check: response_mentions_disambiguation
+    must_contain_one_of:
+      - explicit_request_for_clarification
+      - mention_of_multiple_weller_bottles
+      - acknowledgment_that_answer_depends_on_which_bottle
+
+failure_modes_to_detect:
+  - confidently_answered_about_one_weller_without_acknowledging_ambiguity
+  - made_assumption_about_which_weller_without_stating_it
+  - gave_generic_brand_level_answer_failing_to_acknowledge_lineup_complexity
+  - missed_that_$80_context_matters_differently_per_bottle
+
+notes: >
+  This case tests a subtle but important behavior: the agent should 
+  push back on ambiguity rather than charge ahead. In production, 
+  many user queries will be ambiguous — partial bottle names, 
+  unclear contexts, missing details. An agent that confidently 
+  answers the wrong question is worse than one that asks for 
+  clarification.

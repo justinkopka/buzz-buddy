@@ -1,0 +1,88 @@
+# backend/evals/cases/decision-support/DS-001.yaml
+
+id: DS-001
+category: decision-support
+description: >
+  Multi-factor decision: high-proof preference + wheated preference + 
+  budget constraint, with collection overlap and a positive history 
+  signal pointing toward wheated bottles.
+status: active
+priority: p1
+tags:
+  - preference-application
+  - collection-awareness
+  - budget-adherence
+  - multi-factor
+
+setup:
+  user_collection:
+    - canonical_name: Eagle Rare 10 Year
+    - canonical_name: Wild Turkey 101
+    - canonical_name: Knob Creek 9 Year
+  user_preferences:
+    proof_preference: high       # prefers 100+ proof
+    style_preferences:
+      - wheated
+    budget_max_usd: 80
+  user_history:
+    - bottle: Old Forester 1920
+      rating: 4
+      note: Recently purchased, enjoyed
+  conversation_context: null      # single-turn for this seed case
+
+query:
+  user_message: >
+    I'm at Total Wine. I see Weller Special Reserve for $50, 
+    Buffalo Trace for $30, Larceny Barrel Proof for $70, and 
+    Maker's Mark for $25. Which should I grab?
+
+expected:
+  recommendation:
+    top_pick: Larceny Barrel Proof
+    acceptable_alternates:
+      - Weller Special Reserve  # also wheated, in budget, not owned
+    must_not_recommend:
+      - Maker's Mark             # wheated but lower-proof, already similar to owned profile
+      - Buffalo Trace            # not wheated, not high-proof
+  reasoning_must_cite:
+    - high_proof_preference
+    - wheated_style_preference
+    - budget_consideration
+    - collection_awareness        # acknowledges existing bottles
+  reasoning_should_cite:
+    - positive_history_with_wheated  # Old Forester 1920 signal
+  reasoning_must_not:
+    - hallucinate_bottle_facts
+    - recommend_over_budget_silently   # acceptable if flagged; not if silent
+
+graders:
+  - type: programmatic
+    check: top_recommendation_in_set
+    expected_set: [Larceny Barrel Proof, Weller Special Reserve]
+  - type: programmatic
+    check: did_not_recommend
+    forbidden: [Maker's Mark, Buffalo Trace]
+  - type: programmatic
+    check: respected_budget
+    budget_max_usd: 80
+    allow_flagged_violations: true
+  - type: llm_judge
+    check: reasoning_cites_factors
+    must_cite:
+      - high_proof_preference
+      - wheated_style_preference
+      - budget_consideration
+      - collection_awareness
+  - type: llm_judge
+    check: no_hallucinations
+    description: >
+      Reasoning does not invent facts about bottles 
+      (mash bill, proof, age, etc.) that contradict the KB.
+
+failure_modes_to_detect:
+  - ignored_high_proof_preference
+  - ignored_wheated_preference
+  - failed_collection_overlap_check
+  - hallucinated_bottle_facts
+  - recommended_over_budget_without_flagging
+  - generic_recommendation_no_reasoning
