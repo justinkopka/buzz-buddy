@@ -1,0 +1,255 @@
+.env
+CLAUDE.md
+
+
+# Suggested .gitignore items, see what we need
+# =============================================================================
+# Secrets and Environment Variables
+# =============================================================================
+# NEVER commit any file containing real secrets or API keys
+# .env
+# .env.local
+# .env.*.local
+# .env.development
+# .env.production
+# .env.staging
+# .env.test
+# *.env
+# .envrc
+
+# # Only commit the example template
+# !.env.example
+
+
+# # =============================================================================
+# # Python (Backend)
+# # =============================================================================
+# # Bytecode and caches
+# __pycache__/
+# *.py[cod]
+# *$py.class
+# *.so
+
+# # Distribution / packaging
+# .Python
+# build/
+# develop-eggs/
+# dist/
+# downloads/
+# eggs/
+# .eggs/
+# lib/
+# lib64/
+# parts/
+# sdist/
+# var/
+# wheels/
+# share/python-wheels/
+# *.egg-info/
+# .installed.cfg
+# *.egg
+# MANIFEST
+
+# # Virtual environments
+# venv/
+# .venv/
+# env/
+# ENV/
+# env.bak/
+# venv.bak/
+
+# # Testing and coverage
+# htmlcov/
+# .tox/
+# .nox/
+# .coverage
+# .coverage.*
+# .cache
+# nosetests.xml
+# coverage.xml
+# *.cover
+# *.py,cover
+# .hypothesis/
+# .pytest_cache/
+
+# # Type checkers
+# .mypy_cache/
+# .dmypy.json
+# dmypy.json
+# .pyre/
+# .pytype/
+# .ruff_cache/
+
+# # Jupyter (if you ever use notebooks for KB curation experiments)
+# .ipynb_checkpoints
+# *.ipynb_checkpoints/
+
+
+# # =============================================================================
+# # Node.js / Next.js (Frontend)
+# # =============================================================================
+# # Dependencies
+# node_modules/
+# .pnp
+# .pnp.*
+# .yarn/*
+# !.yarn/patches
+# !.yarn/plugins
+# !.yarn/releases
+# !.yarn/versions
+
+# # Next.js build output
+# .next/
+# out/
+
+# # Production builds
+# build/
+# dist/
+
+# # Testing
+# coverage/
+# *.lcov
+
+# # Misc
+# .npm
+# .eslintcache
+# .stylelintcache
+# .parcel-cache
+# .cache/
+
+# # Vercel
+# .vercel
+
+
+# # =============================================================================
+# # AWS / Infrastructure
+# # =============================================================================
+# # AWS SAM
+# .aws-sam/
+# samconfig.toml
+# packaged.yaml
+
+# # AWS CDK (if you go that route)
+# cdk.out/
+# .cdk.staging/
+
+# # Serverless Framework (if you go that route)
+# .serverless/
+
+# # Terraform (if you ever use it)
+# *.tfstate
+# *.tfstate.*
+# .terraform/
+# *.tfvars
+# !*.tfvars.example
+
+
+# # =============================================================================
+# # IDE and Editor
+# # =============================================================================
+# # VS Code
+# .vscode/
+# !.vscode/settings.json.example
+# !.vscode/launch.json.example
+# !.vscode/extensions.json
+
+# # JetBrains (PyCharm, IntelliJ, WebStorm, etc.)
+# .idea/
+# *.iml
+# *.iws
+# out/
+
+# # Vim
+# *.swp
+# *.swo
+# *~
+
+# # Emacs
+# *~
+# \#*\#
+# /.emacs.desktop
+# /.emacs.desktop.lock
+# *.elc
+# auto-save-list
+# tramp
+# .\#*
+
+# # Sublime Text
+# *.sublime-workspace
+# *.sublime-project
+
+
+# # =============================================================================
+# # OS-specific
+# # =============================================================================
+# # macOS
+# .DS_Store
+# .AppleDouble
+# .LSOverride
+# ._*
+# .Spotlight-V100
+# .Trashes
+
+# # Windows
+# Thumbs.db
+# ehthumbs.db
+# ehthumbs_vista.db
+# Desktop.ini
+# $RECYCLE.BIN/
+# *.lnk
+
+# # Linux
+# .directory
+# .Trash-*
+
+
+# # =============================================================================
+# # Logs
+# # =============================================================================
+# *.log
+# logs/
+# npm-debug.log*
+# yarn-debug.log*
+# yarn-error.log*
+# lerna-debug.log*
+# pnpm-debug.log*
+
+
+# # =============================================================================
+# # Temporary Files
+# # =============================================================================
+# *.tmp
+# *.temp
+# *.bak
+# *.swp
+# *.swo
+# tmp/
+# temp/
+# *.local
+
+
+# # =============================================================================
+# # BuzzBuddy-Specific
+# # =============================================================================
+# # Local KB working files (drafts, scratch, before committing to YAML)
+# scratch/
+# notes-local/
+
+# # Local eval result files (only summaries get committed to docs/metrics/)
+# eval-results-raw/
+# *.eval-output.json
+
+# # Database dumps (for local backups during development)
+# *.sql.gz
+# *.db
+# *.sqlite
+# *.sqlite3
+# local-db-snapshots/
+
+# # Embedding caches (in case you generate locally for testing)
+# embeddings-cache/
+# *.embeddings.pkl
+
+# # AI/LLM outputs that shouldn't be in repo
+# llm-outputs/
+# agent-traces-local/
