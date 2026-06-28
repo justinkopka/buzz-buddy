@@ -18,29 +18,27 @@ import {
 import { Input } from "@/components/ui/input"
 import { createClient } from '@/lib/supabase/client'
 import { useState } from "react";
-import Link from 'next/link'
 
-export function LoginForm({
+export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const supabase = createClient()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [error, setError] = useState('')
 
-  async function signInWithGoogle() {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
-  }
-
-  async function signInWithEmail(event: React.SubmitEvent<HTMLFormElement>) {
+  async function signUp(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
+
+    if (password !== confirmPassword) {
+        setError('Passwords do not match')
+        return
+    }
+    setError('')
    
-    const {data, error} = await supabase.auth.signInWithPassword({ 
+    const {data, error} = await supabase.auth.signUp({ 
       email: email, 
       password: password 
     })
@@ -50,13 +48,13 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
+          <CardTitle>Create a new account</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Enter your email below
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={signInWithEmail}>
+          <form onSubmit={signUp}>
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -70,15 +68,7 @@ export function LoginForm({
                 />
               </Field>
               <Field>
-                <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <a
-                    href="#"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
-                </div>
+                <FieldLabel htmlFor="password">Password</FieldLabel>
                 <Input 
                   id="password" 
                   type="password" 
@@ -88,13 +78,18 @@ export function LoginForm({
                 />
               </Field>
               <Field>
-                <Button type="submit">Login</Button>
-                <Button variant="outline" type="button" onClick={signInWithGoogle}>
-                  Login with Google
-                </Button>
-                <FieldDescription className="text-center">
-                  Don&apos;t have an account? <Link href="/signup">Sign up</Link>
-                </FieldDescription>
+                <FieldLabel htmlFor="password">Confirm Password</FieldLabel>
+                <Input 
+                  id="confirmPassword" 
+                  type="password" 
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required 
+                />
+              </Field>
+              {error && <p className="text-sm text-destructive">{error}</p>}
+              <Field>
+                <Button type="submit">Sign Up</Button>
               </Field>
             </FieldGroup>
           </form>
