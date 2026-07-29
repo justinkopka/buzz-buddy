@@ -28,6 +28,7 @@ export function SignupForm({
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
+  const [isSubmitted, setIsSubmitted] = useState(false)
 
   async function signUp(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -42,58 +43,75 @@ export function SignupForm({
       email: email, 
       password: password 
     })
+
+    if (!error) {
+      setIsSubmitted(true)
+    } else {
+      setError(error.message)
+    }
   }
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
-        <CardHeader>
-          <CardTitle>Create a new account</CardTitle>
-          <CardDescription>
-            Enter your email below
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={signUp}>
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="m@example.com"
-                  required
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="password">Password</FieldLabel>
-                <Input 
-                  id="password" 
-                  type="password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required 
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="password">Confirm Password</FieldLabel>
-                <Input 
-                  id="confirmPassword" 
-                  type="password" 
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required 
-                />
-              </Field>
-              {error && <p className="text-sm text-destructive">{error}</p>}
-              <Field>
-                <Button type="submit">Sign Up</Button>
-              </Field>
-            </FieldGroup>
-          </form>
-        </CardContent>
+        {isSubmitted ? (
+          <CardHeader>
+              <CardTitle>Check your email</CardTitle>
+              <CardDescription>
+                We sent a confirmation to <strong>{email}</strong>. Check your email to activate your account.
+              </CardDescription>
+            </CardHeader>
+        ) : (
+          <>
+            <CardHeader>
+              <CardTitle>Create a new account</CardTitle>
+              <CardDescription>
+                Enter your email below
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={signUp}>
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor="email">Email</FieldLabel>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="m@example.com"
+                      required
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="password">Password</FieldLabel>
+                    <Input 
+                      id="password" 
+                      type="password" 
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required 
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
+                    <Input 
+                      id="confirmPassword" 
+                      type="password" 
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required 
+                    />
+                  </Field>
+                  {error && <p className="text-sm text-destructive">{error}</p>}
+                  <Field>
+                    <Button type="submit">Sign Up</Button>
+                  </Field>
+                </FieldGroup>
+              </form>
+            </CardContent>
+          </>
+        )}
       </Card>
     </div>
   )
