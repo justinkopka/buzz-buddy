@@ -27,7 +27,7 @@ This project is being built as:
 3. A genuinely useful tool for bourbon enthusiasts.
 
 The build is happening in public — see `docs/` for architectural 
-decisions, sprint retros, and progress metrics.
+decisions. Day-to-day progress is tracked via GitHub Projects/Issues.
 
 ## Tech Stack
 
@@ -61,16 +61,11 @@ See `docs/adr/` for the reasoning behind these choices.
 
 ## Project Documentation
 
-- **[Roadmap](docs/planning/roadmap.md)** — The 15-sprint plan from 
-  thin MVP through v1.0
-- **[Architectural Decisions](docs/adr/README.md)** — Index of ADRs 
-  documenting major technical choices
-- **[Sprint Retros](docs/retros/)** — Weekly reflections on progress 
-  and learnings
-- **[Eval Framework](docs/evals/README.md)** — How agent quality is 
+- **Roadmap** — not yet written
+- **[Architectural Decisions](docs/adr/)** — ADR notes and, eventually,
+  the numbered ADR index documenting major technical choices
+- **[Eval Framework](backend/evals/README.md)** — How agent quality is 
   measured
-- **[Metrics](docs/metrics/)** — Time tracking, weekly metrics, and 
-  eval history
 
 ## Development
 

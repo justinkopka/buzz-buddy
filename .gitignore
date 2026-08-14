@@ -249,3 +249,6 @@ embeddings-cache/
 # AI/LLM outputs that shouldn't be in repo
 llm-outputs/
 agent-traces-local/
+
+# Private notes not meant for the public repo
+docs/resume-notes.md

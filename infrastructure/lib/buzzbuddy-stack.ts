@@ -37,7 +37,8 @@ export class BuzzBuddyStack extends cdk.Stack {
       functionName: 'buzzbuddy-backend',
       code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, '..', '..', 'backend')),
       memorySize: 512,
-      timeout: cdk.Duration.seconds(30),
+      timeout: cdk.Duration.seconds(60),
+      reservedConcurrentExecutions: 10,
       logGroup,
       environment: {
         ANTHROPIC_API_KEY_SECRET_ARN: secrets.ANTHROPIC_API_KEY.secretArn,

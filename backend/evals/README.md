@@ -8,8 +8,8 @@ provide the feedback loop that turns prompt and architecture changes from
 guesses into measured improvements.
 
 This document captures the design of the eval system. The runner itself
-will be built in Sprint 7. Seed test cases drafted in Sprint 0 establish
-the format and rigor standard for the broader suite.
+has not been built yet. Seed test cases drafted during initial project
+planning establish the format and rigor standard for the broader suite.
 
 ## Why Evals Matter to This Project
 
@@ -159,7 +159,7 @@ good recommendations actually work in practice.
 
 ## Runner Architecture Requirements
 
-The eval runner (to be built in Sprint 7) must satisfy several
+The eval runner (not yet built) must satisfy several
 architectural constraints that emerged during seed case design:
 
 1. **Full trace capture, not just final response.** Graders may need
@@ -214,8 +214,8 @@ prompt to identify suspicious patterns — categories where pass rates
 have drifted, latency regressions, judge score drift, etc. This
 catches unknown unknowns that statistical methods miss.
 
-Both features are planned for Sprint 7+ as enhancements to the base
-eval runner.
+Both features are planned as enhancements to the base eval runner,
+after the runner itself exists.
 
 ## File Layout
 
@@ -227,11 +227,11 @@ eval runner.
     │   ├── edge-cases/
     │   ├── tool-use/
     │   └── (additional categories as needed)
-    ├── graders/                        # Grader implementations (Sprint 7)
+    ├── graders/                        # Grader implementations (not yet built)
     │   ├── programmatic/
     │   └── llm_judge/
-    ├── runner.py                       # Main eval runner (Sprint 7)
-    └── test_eval_suite.py              # Pytest wrapper (Sprint 7)
+    ├── runner.py                       # Main eval runner (not yet built)
+    └── test_eval_suite.py              # Pytest wrapper (not yet built)
 
     docs/evals/
     ├── README.md                       # This document
@@ -242,19 +242,16 @@ eval runner.
 
 ## Current State
 
-As of the end of Sprint 0:
-
 - Eval design completed
 - Six seed test cases drafted establishing the format and rigor
   standard (DS-001, CA-001/002/003, HR-001/002, EC-001, TU-001)
-- Runner and graders to be implemented in Sprint 7
-- Seed cases serve as informal sanity checks during Sprints 1-6
+- Runner and graders not yet implemented
+- Seed cases serve as informal sanity checks in the meantime
 
 ## Future Work
 
-- Expand to 30-50 test cases across categories in Sprint 7
+- Expand to 30-50 test cases across categories
 - Build runner with all architecture requirements above
 - Implement anomaly detection features
-- Concretize tool-use template cases once agent and tools are built
-  (post-Sprint 4)
+- Concretize tool-use template cases once the agent and its tools are built
 - Establish per-release eval thresholds for CI gating
