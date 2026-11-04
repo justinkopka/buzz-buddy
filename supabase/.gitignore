@@ -2,6 +2,10 @@
 .branches
 .temp
 
+# Studio SQL Editor scratch queries — auto-named, and anything worth
+# keeping belongs in a migration instead
+snippets/
+
 # dotenvx
 .env.keys
 .env.local

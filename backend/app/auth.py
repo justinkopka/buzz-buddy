@@ -17,8 +17,11 @@ class User:
     roles: list[str]
 
 
-async def get_current_user(authorization: str = Header(...)) -> User:
-    if not authorization.startswith("Bearer "):
+async def get_current_user(authorization: str | None = Header(default=None)) -> User:
+    # Optional rather than Header(...): a required header makes a missing token
+    # a request-validation failure (422) before this function runs, which hides
+    # the real condition. Absent credentials are a 401.
+    if authorization is None or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing bearer token")
 
     token = authorization.removeprefix("Bearer ").strip()
