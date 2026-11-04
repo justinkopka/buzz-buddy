@@ -19,6 +19,7 @@ was decided, why, and what alternatives were considered. Use
 | [0009](0009-lambda-function-url-over-api-gateway.md) | Lambda Function URL over AWS API Gateway | Accepted |
 | [0010](0010-eval-framework-execution.md) | Eval framework execution architecture (custom runner + LangSmith for traces only) | Accepted |
 | [0011](0011-product-schema-structure.md) | Single-table multi-vertical product schema | Accepted |
+| [0012](0012-hybrid-retrieval-architecture.md) | Hybrid retrieval architecture (three-arm weighted RRF) | Accepted |
 
 `notes-infrastructure-deployment.md` in this directory has raw material
 from the CDK deployment work — most directly relevant to ADR 0009, but

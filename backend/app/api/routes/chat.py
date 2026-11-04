@@ -10,7 +10,15 @@ from app.auth import CurrentUser, get_current_user
 
 router = APIRouter(tags=["chat"], dependencies=[Depends(get_current_user)])
 
-client = anthropic.AsyncAnthropic()
+# Sized against the Lambda's 60s timeout. The SDK defaults are 10 minutes with
+# 2 retries, and timeouts are themselves retried -- a worst case of 30 minutes,
+# so the Lambda would be killed long before the client gave up and the caller
+# would get a truncated connection instead of an error.
+#
+# 25s x (1 retry + 1) = 50s worst case, leaving headroom inside the 60s budget.
+# Because this endpoint streams, 25s is a per-chunk read timeout rather than a
+# total, so a long answer is fine as long as tokens keep arriving.
+client = anthropic.AsyncAnthropic(timeout=25.0, max_retries=1)
 
 class ChatTurn(BaseModel):
     role: Literal["user", "assistant"]

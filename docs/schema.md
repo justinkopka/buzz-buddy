@@ -169,6 +169,33 @@ shelf it's still good; at $300 secondary it's a different decision.
 | `secondary_market_high_usd` | `NUMERIC` | Nullable |
 | `pricing_notes` | `TEXT` | "MSRP $40 but typically $80–150 due to allocation" |
 
+### Releases
+
+Per-batch detail for bottles sold in distinct batches — barrel proof lines,
+annual limited editions. The product-level columns describe the bottle in
+general; `releases` records how individual batches differ from it. NULL means
+no releases recorded, the normal case for a non-batched bottle.
+
+| Column | Type | Notes |
+|---|---|---|
+| `releases` | `JSONB` | Array, one object per release. Guideline shape below; keys are not validated, so new ones need no migration |
+
+```json
+[
+  {
+    "laser_code": "L23182",
+    "batch": "Batch 3",
+    "year": 2023,
+    "proof": 114.8,
+    "msrp_usd": 70,
+    "notes": "First release after the age statement returned"
+  }
+]
+```
+
+Not embedded: batch-level detail adds noise to product-level similarity, and
+the agent reads it from the row once retrieval has found the product.
+
 ### Availability
 
 | Column | Type | Notes |
@@ -223,7 +250,7 @@ natural language (never serialized JSON — see
 | `id` | `UUID` | PK |
 | `product_id` | `UUID NOT NULL → products(id) ON DELETE CASCADE` | |
 | `embedding_type` | `TEXT NOT NULL` | `full_profile` \| `tasting_notes` \| `community_sentiment` |
-| `embedding` | `VECTOR(1536)` | OpenAI `text-embedding-3-small` |
+| `embedding` | `VECTOR(1536)` | OpenAI `text-embedding-3-large`, requested at `dimensions=1536` (native is 3072) |
 | `source_text` | `TEXT` | Exactly what was embedded — for debugging retrieval and clean re-embedding on model change |
 | `created_at` | `TIMESTAMPTZ` | |
 

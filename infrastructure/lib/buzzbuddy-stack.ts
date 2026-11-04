@@ -9,6 +9,7 @@ const SECRET_NAME_PREFIX = 'buzzbuddy/prod/';
 const SECRET_KEYS = [
   'ANTHROPIC_API_KEY',
   'OPENAI_API_KEY',
+  'DATABASE_URL',
   'SUPABASE_URL',
   'SUPABASE_SECRET_KEY',
   'LANGCHAIN_API_KEY',
@@ -43,6 +44,7 @@ export class BuzzBuddyStack extends cdk.Stack {
       environment: {
         ANTHROPIC_API_KEY_SECRET_ARN: secrets.ANTHROPIC_API_KEY.secretArn,
         OPENAI_API_KEY_SECRET_ARN: secrets.OPENAI_API_KEY.secretArn,
+        DATABASE_URL_SECRET_ARN: secrets.DATABASE_URL.secretArn,
         SUPABASE_URL_SECRET_ARN: secrets.SUPABASE_URL.secretArn,
         SUPABASE_SECRET_KEY_SECRET_ARN: secrets.SUPABASE_SECRET_KEY.secretArn,
         LANGCHAIN_API_KEY_SECRET_ARN: secrets.LANGCHAIN_API_KEY.secretArn,

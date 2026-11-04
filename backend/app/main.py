@@ -6,7 +6,8 @@ if os.environ.get("ANTHROPIC_API_KEY_SECRET_ARN"):
     _sm = boto3.client("secretsmanager", region_name="us-east-2")
     for _key in [
         "ANTHROPIC_API_KEY",
-        # "OPENAI_API_KEY",  # TODO: no secret created yet, not implemented
+        "OPENAI_API_KEY",
+        "DATABASE_URL",
         "SUPABASE_URL",
         "SUPABASE_SECRET_KEY",
         # "LANGCHAIN_API_KEY",  # TODO: no secret created yet, not implemented
@@ -21,8 +22,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 
 from app.api.main import api_router
+from app.errors import register_error_handlers
 
 app = FastAPI()
+
+register_error_handlers(app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -32,9 +36,5 @@ app.add_middleware(
 )
 
 app.include_router(api_router)
-
-# @app.get("/health")
-# def health():
-#     return {"status": "ok"}
 
 handler = Mangum(app)

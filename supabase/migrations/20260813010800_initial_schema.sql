@@ -357,8 +357,10 @@ CREATE TABLE public.product_embeddings (
   product_id     uuid                     NOT NULL,
   embedding_type text                     NOT NULL,
 
-  -- OpenAI text-embedding-3-small. The dimension is effectively locked:
-  -- changing embedding models means re-embedding every row.
+  -- OpenAI text-embedding-3-large, requested at dimensions=1536 (native is
+  -- 3072). The column WIDTH is locked; the model is not. Both v3 models accept
+  -- a `dimensions` parameter, so switching models is a re-embedding script
+  -- with no migration -- as long as the replacement also emits 1536.
   embedding      extensions.vector(1536),
 
   -- Exactly what was embedded. Source text must be natural-language prose
