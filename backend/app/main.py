@@ -10,12 +10,17 @@ if os.environ.get("ANTHROPIC_API_KEY_SECRET_ARN"):
         "DATABASE_URL",
         "SUPABASE_URL",
         "SUPABASE_SECRET_KEY",
-        # "LANGCHAIN_API_KEY",  # TODO: no secret created yet, not implemented
+        "LANGSMITH_API_KEY",
     ]:
         os.environ[_key] = _sm.get_secret_value(SecretId=os.environ[f"{_key}_SECRET_ARN"])["SecretString"]
 else:
     from dotenv import load_dotenv
     load_dotenv()
+
+    # Show app INFO logs in the local console. Lambda configures its own
+    # logging (JSON at INFO, set in the CDK stack).
+    import logging
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

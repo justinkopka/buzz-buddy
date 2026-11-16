@@ -12,7 +12,7 @@ const SECRET_KEYS = [
   'DATABASE_URL',
   'SUPABASE_URL',
   'SUPABASE_SECRET_KEY',
-  'LANGCHAIN_API_KEY',
+  'LANGSMITH_API_KEY',
 ] as const;
 
 export class BuzzBuddyStack extends cdk.Stack {
@@ -41,13 +41,21 @@ export class BuzzBuddyStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(60),
       reservedConcurrentExecutions: 10,
       logGroup,
+      // TEXT format (the default) drops the app's INFO logs. JSON at INFO keeps
+      // them, so each request's summary line, with its LangSmith trace id,
+      // reaches CloudWatch.
+      loggingFormat: lambda.LoggingFormat.JSON,
+      applicationLogLevelV2: lambda.ApplicationLogLevel.INFO,
       environment: {
+        // Not secrets: the on/off switch and destination for LangSmith traces.
+        LANGSMITH_TRACING: 'true',
+        LANGSMITH_PROJECT: 'buzzbuddy-production',
         ANTHROPIC_API_KEY_SECRET_ARN: secrets.ANTHROPIC_API_KEY.secretArn,
         OPENAI_API_KEY_SECRET_ARN: secrets.OPENAI_API_KEY.secretArn,
         DATABASE_URL_SECRET_ARN: secrets.DATABASE_URL.secretArn,
         SUPABASE_URL_SECRET_ARN: secrets.SUPABASE_URL.secretArn,
         SUPABASE_SECRET_KEY_SECRET_ARN: secrets.SUPABASE_SECRET_KEY.secretArn,
-        LANGCHAIN_API_KEY_SECRET_ARN: secrets.LANGCHAIN_API_KEY.secretArn,
+        LANGSMITH_API_KEY_SECRET_ARN: secrets.LANGSMITH_API_KEY.secretArn,
       },
     });
 

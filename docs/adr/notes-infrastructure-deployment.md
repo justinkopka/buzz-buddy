@@ -46,13 +46,13 @@ Raw notes from the session where the backend's AWS infrastructure was rebuilt in
 
 ## Candidate ADR: Secrets management — Secrets Manager, runtime fetch via boto3
 
-**Decision:** 5 API keys (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `LANGCHAIN_API_KEY`) live in AWS Secrets Manager (`buzzbuddy/prod/*`), created manually outside CDK — the stack never creates the secret values, only references them by name and grants the Lambda execution role read access. `backend/app/main.py` fetches actual values from Secrets Manager at cold start using `boto3`, rather than having CDK resolve them at deploy time via a CloudFormation dynamic reference.
+**Decision:** the backend's secrets (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `LANGSMITH_API_KEY`) live in AWS Secrets Manager (`buzzbuddy/prod/*`), created manually outside CDK — the stack never creates the secret values, only references them by name and grants the Lambda execution role read access. `backend/app/main.py` fetches actual values from Secrets Manager at cold start using `boto3`, rather than having CDK resolve them at deploy time via a CloudFormation dynamic reference.
 
 **Why runtime fetch over dynamic reference:** a CloudFormation dynamic reference would resolve secret values at deploy time and write them as plaintext Lambda environment variables — visible to anyone who can read the function's config in the console. Runtime fetch keeps plaintext out of the console/CloudFormation template entirely, and is what makes the IAM `grantRead` permission actually do real work (with a dynamic reference, the grant would be functionally unused, since the *deploying* role resolves the value, not the Lambda's own role).
 
 **Why secrets aren't CDK-managed resources:** if CDK created the `Secret` resources, a `cdk destroy` or stack replacement could delete/schedule-delete them — too much blast radius for credentials that should outlive any given infra deploy.
 
-**Current state (as of this session), not a design decision — just status:** only `ANTHROPIC_API_KEY`, `SUPABASE_URL`, and `SUPABASE_SECRET_KEY` are actually created. `OPENAI_API_KEY` and `LANGCHAIN_API_KEY` are deferred until the features that need them (embeddings, LangSmith tracing) are implemented — commented out in `main.py`'s fetch loop with a `TODO` marker so the Lambda doesn't crash trying to fetch secrets that don't exist yet.
+**Current state (2026-11), not a design decision — just status:** all six secrets are created and fetched by `main.py`'s loop. Secrets were provisioned as the features needing them landed: `OPENAI_API_KEY` and `DATABASE_URL` with embeddings and the admin routes, `LANGSMITH_API_KEY` with tracing (renamed from `LANGCHAIN_API_KEY`, LangSmith's current name for it). A secret must exist before a deploy whose `main.py` fetches it, or every cold start fails. Each is stored as a plaintext string, not key/value JSON, because `main.py` copies the `SecretString` straight into an environment variable.
 
 ---
 
