@@ -29,7 +29,7 @@ I also have prior experience with Google's Agent Development Kit (ADK), which is
 
 ## Consequences
 
-- **Not yet implemented.** `backend/app/api/routes/chat.py` currently makes a single direct call to `anthropic.AsyncAnthropic().messages.stream()` with no tool-use, no multi-step loop, and no retry/error-handling logic. This ADR documents the intended architecture; the custom loop itself has not been built yet.
+- **Implemented** in `backend/app/agent.py`: a custom loop on the native tool use API (`messages.stream`), with tools defined and executed in `backend/app/tools.py`. `backend/app/api/routes/chat.py` streams the loop's text to the client.
 - Owning the agent loop directly means owning all retry logic, error handling, and trace logging around tool-use — no upstream framework absorbing bug fixes or improvements to that orchestration code. Realistically ~100–150 lines for the core dispatch loop; Anthropic's SDK-provided tool-runner helper, if adopted, could shrink this further.
 - Because the tools themselves (`search_knowledge_base` and future tools) are plain, independent Python functions regardless of orchestrator, migrating to LangGraph later is low-regret: LangGraph's nodes follow the same call-model/execute-tools/route pattern, just with more structure layered on. Adopting it later means wrapping existing tools in a more structured orchestrator, not rewriting them.
 - Two separate dependency surfaces to track instead of one: Anthropic's SDK for the runtime loop, and LangChain's document-loader/text-splitter APIs for ingestion — a breaking change in either needs separate attention. LangSmith is a third, independent surface (its own SDK, usable without LangChain-the-framework).

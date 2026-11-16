@@ -14,6 +14,7 @@ dependencies = [
     "asyncpg>=0.31.0",
     "pgvector>=0.5.0",
     "openai>=1.60.0",
+    "langsmith>=0.14.17",
 ]
 
 [dependency-groups]
@@ -23,3 +24,12 @@ dev = [
     "pytest-asyncio>=1.4.0",
     "ruff>=0.15.17",
 ]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+# Every `async def test_*` runs as an asyncio test without a per-test marker.
+asyncio_mode = "auto"
+# db._pool is a module global, so every async test and fixture must share one
+# event loop: a pool created on one loop cannot be used from another.
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"

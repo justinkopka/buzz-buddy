@@ -204,6 +204,12 @@ async def _embed(texts: list[str]) -> list[list[float]]:
     return [item.embedding for item in sorted(response.data, key=lambda d: d.index)]
 
 
+async def embed_query(text: str) -> list[float]:
+    """Wrapper to embed the retrieval search query into the same vector space the original items were embedded with"""
+    [vector] = await _embed([text])
+    return vector
+
+
 async def sync_embeddings(product_id: UUID, force: bool = False) -> dict[str, int]:
     """Bring a product's embeddings in line with its current content.
 

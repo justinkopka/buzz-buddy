@@ -35,9 +35,9 @@ Create the secrets (values are never stored in this repo):
 aws secretsmanager create-secret --name buzzbuddy/prod/ANTHROPIC_API_KEY --secret-string "<value>" --region us-east-2
 aws secretsmanager create-secret --name buzzbuddy/prod/SUPABASE_URL --secret-string "<value>" --region us-east-2
 aws secretsmanager create-secret --name buzzbuddy/prod/SUPABASE_SECRET_KEY --secret-string "<value>" --region us-east-2
+aws secretsmanager create-secret --name buzzbuddy/prod/LANGSMITH_API_KEY --secret-string "<value>" --region us-east-2
 # Not created yet — deferred until the features that need them exist:
 # aws secretsmanager create-secret --name buzzbuddy/prod/OPENAI_API_KEY --secret-string "<value>" --region us-east-2
-# aws secretsmanager create-secret --name buzzbuddy/prod/LANGCHAIN_API_KEY --secret-string "<value>" --region us-east-2
 ```
 Secret names must exactly match `SECRET_NAME_PREFIX` + key name in `lib/buzzbuddy-stack.ts`. `backend/app/main.py`'s secrets-fetch loop only requests the keys currently uncommented there — uncomment the corresponding line when a secret is actually created, otherwise the Lambda will crash on cold start trying to fetch a secret that doesn't exist.
 

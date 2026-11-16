@@ -2,6 +2,7 @@
 
 **Status:** Accepted
 **Date:** 2026-08-17
+**Revised:** 2026-11-04 — RRF fusion moved from SQL to Python (`rrf_score`); the query returns per-arm ranks only
 
 ## Context
 
@@ -173,9 +174,10 @@ the single best one.
 
 ## Consequences
 
-- **Not yet implemented.** No retrieval code exists in the repo as of this ADR;
-  `backend/app/api/routes/chat.py` is still a direct passthrough to Claude with
-  no tools and no retrieval.
+- **Implemented** in `backend/app/retrieval.py` (`hybrid_search`,
+  `resolve_bottle`, `get_details`, `get_related`) and exposed to Claude as tools
+  in `backend/app/tools.py`. `backend/app/api/routes/chat.py` now runs the agent
+  loop (ADR-0004) instead of passing messages straight to Claude.
 - **Supersedes ADR-0005's retrieval sequencing.** That ADR states retrieval
   ships against `full_profile` only, with type-selection layered in later, and
   lists the other two embedding types as deliberately unused. Both statements
@@ -201,10 +203,14 @@ the single best one.
   document can still outscore a rare exact match within a single arm. The name
   arm limits the blast radius; it does not fix the underlying gap. In-memory
   BM25 remains the real fix if this becomes the binding constraint.
-- **The fused query is genuinely harder to read** than a single ranked
-  `SELECT` — six CTEs, thirteen bind parameters. The tradeoff is accepted
-  because the complexity is confined to one string in one module, while the
-  behavior it produces is tunable from a dictionary of floats.
+- **Fusion runs in Python, not SQL.** The query returns every candidate any
+  arm found, with its per-arm ranks; `rrf_score` combines them and
+  `hybrid_search` sorts and truncates. This was originally a single fused
+  query (six CTEs, thirteen bind parameters). Moving the arithmetic out cut
+  the parameters to nine, made fusion unit-testable without a database, and
+  means the offline tuning sweep scores configurations with the same function
+  production uses. The cost is returning up to `3 × ARM_DEPTH` candidate rows
+  instead of `SEARCH_LIMIT` — in practice 30–45, trivial at this corpus size.
 - **An expression index on `to_tsvector('english', canonical_name)` is
   available** if the name arm's per-query sequential scan ever costs real time.
   It is pure performance DDL by the principle above — adding or dropping it can

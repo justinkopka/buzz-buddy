@@ -34,8 +34,9 @@ Datadog was rejected as expensive and overkill — its value proposition is unif
 
 ## Consequences
 
-- **CloudWatch is the only layer already partially live** — the Log Group exists (`infrastructure/lib/buzzbuddy-stack.ts`) and Lambda's default execution logs flow there, but structured application logging and Logs Insights integration aren't set up yet.
-- **LangSmith tracing and loguru are both not yet implemented** — no matching dependencies in `backend/pyproject.toml`, no tracing decorators or structured logging calls anywhere in the codebase.
+- **LangSmith tracing is implemented.** Each chat request is one trace: a root `chat` span in `backend/app/api/routes/chat.py`, the Claude calls traced by wrapping the Anthropic client with `wrap_anthropic` in `backend/app/agent.py`, and each tool call as its own span carrying the full raw result. The project is set per environment with `LANGSMITH_PROJECT` (`buzzbuddy-local` in `.env`, `buzzbuddy-production` in the CDK stack). On Lambda, traces are flushed in a background task after the response body, since the process freezes once the request ends.
+- **CloudWatch carries application logs.** The Lambda uses JSON log format at INFO (`infrastructure/lib/buzzbuddy-stack.ts`), so app logs reach the Log Group alongside the execution logs. Each chat request logs one `chat done trace_id=...` line, which links a CloudWatch entry to its LangSmith trace.
+- **loguru is not adopted yet.** Application logging uses the standard library's `logging`, structured by Lambda's JSON format rather than by loguru. Whether loguru still adds enough to justify it is an open question.
 - Eval runs and production traffic share the same LangSmith trace quota — as the eval suite grows toward its planned 30–50 case target, trace consumption from evals alone grows too, worth monitoring rather than assuming the free tier is solely a production-traffic concern.
 - Because the LangSmith preference is soft (not deeply coupled via LangChain-specific integration), migrating to self-hosted Langfuse later is a real, low-friction option if cost becomes a problem — not just a theoretical alternative.
 - Three separate tools means three separate places to look when debugging — a real coordination cost, accepted because each layer covers a distinct failure mode the others don't.
@@ -43,6 +44,7 @@ Datadog was rejected as expensive and overkill — its value proposition is unif
 ## References
 
 - CLAUDE.md — tech stack table, observability row already documents this decision
-- `infrastructure/lib/buzzbuddy-stack.ts` — CloudWatch Log Group, the one piece already live
+- `infrastructure/lib/buzzbuddy-stack.ts` — CloudWatch Log Group, JSON logging, LangSmith env vars
+- `backend/app/api/routes/chat.py`, `backend/app/agent.py` — tracing
 - `backend/evals/README.md` — eval framework design, source of the trace-volume math
-- `.env.example` — `LANGCHAIN_API_KEY` placeholder
+- `.env.example` — `LANGSMITH_API_KEY`, `LANGSMITH_TRACING`, `LANGSMITH_PROJECT` placeholders
