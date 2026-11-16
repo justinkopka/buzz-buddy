@@ -35,7 +35,12 @@ register_error_handlers(app)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://buzz-buddy-pi.vercel.app"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://buzz-buddy.app",
+        "https://www.buzz-buddy.app",
+        "https://buzz-buddy-pi.vercel.app",
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
